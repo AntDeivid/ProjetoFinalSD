@@ -5,6 +5,7 @@ from common.models.movie import Movie
 
 class MovieList(BaseModel):
     id: int
+    user_id: int
     name: str
     description: str
     movies: list[Movie]
