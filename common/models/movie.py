@@ -14,6 +14,12 @@ class Movie(BaseModel):
     actors: str
     director: str
     writer: str
+    poster_url: str
+    backdrop_url: str
+    trailer_url: str
+    language: str
+    popularity: float
+    vote_average: float
     streaming_options: list[StreamingOption]
     reviews: list[Review]
 
