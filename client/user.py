@@ -1,7 +1,9 @@
-from client.UDPClient import UDPClient
 from client.proxy import FilmeProxy
 from InquirerPy import prompt
-
+from client.UDPClient import UDPClient
+from typing import List
+from common.models.movie import Movie
+from json import loads
 
 class FilmeClient:
     def __init__(self, proxy):
@@ -16,16 +18,17 @@ class FilmeClient:
             }
         ])["query"]
 
-        response = self.proxy.buscar_filme(query)
-        if not response:
-            print("Erro: Nenhuma resposta recebida do servidor.")
-            return
+        try:
+            response: List[Movie] = self.proxy.buscar_filme(query)
+            
+            if not response:
+                print("Erro: Nenhuma resposta recebida do servidor.")
+                return
 
-        if "error" in response:
-            print(f"Erro: {response['error']}")
-        else:
             print("\nInformações do filme:")
             print(response)
+        except Exception as e:
+            print(f"Erro: {e}")
 
     def buscar_streaming(self):
         filme_id = prompt([

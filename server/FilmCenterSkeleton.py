@@ -6,9 +6,10 @@ class FilmCenterSkeleton:
 
     async def search_movie(self, args_bytes: ByteString):
         try:
-            busca = pickle.loads(args_bytes)
-            if not isinstance(busca, str):
-                raise ValueError("O parâmetro de busca deve ser uma string.")
+            args = pickle.loads(args_bytes)
+            if not isinstance(args, list) or not all(isinstance(arg, str) for arg in args):
+                raise ValueError("Os parâmetros de busca devem ser uma lista de strings.")
+            busca = args[0]  
             filmes = await MovieService.search_movie(busca)
             return pickle.dumps(filmes)
         except ValueError as e:

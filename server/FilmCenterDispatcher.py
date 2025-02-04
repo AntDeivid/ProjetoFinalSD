@@ -7,7 +7,6 @@ from server.FilmCenterSkeleton import FilmCenterSkeleton
 
 class FilmCenterDispatcher:
     async def seleciona_esqueleto(self, request: Message) -> Message:
-        resposta = None
         try:
             # Encontra a classe dentro do módulo
             class_name = f"{request.obfReference}Skeleton"
@@ -45,10 +44,38 @@ class FilmCenterDispatcher:
             
         except ImportError as e:
             print(f"Erro ao importar módulo: {e}")
+            response_message = Message(
+                type=1,
+                id=request.id,
+                obfReference=request.obfReference,
+                methodId=request.methodId,
+                arguments=pickle.dumps(e)
+            )
         except AttributeError as e:
             print(f"Erro ao acessar atributo ou classe: {e}")
+            response_message = Message(
+                type=1,
+                id=request.id,
+                obfReference=request.obfReference,
+                methodId=request.methodId,
+                arguments=pickle.dumps(e)
+            )
         except TypeError as e:
             print(f"Erro de tipo: {e}")
+            response_message = Message(
+                type=1,
+                id=request.id,
+                obfReference=request.obfReference,
+                methodId=request.methodId,
+                arguments=pickle.dumps(e)
+            )
         except Exception as e:
             print(f"Erro inesperado: {e}")
-        return resposta
+            response_message = Message(
+                type=1,
+                id=request.id,
+                obfReference=request.obfReference,
+                methodId=request.methodId,
+                arguments=pickle.dumps(e)
+            )
+        return response_message  # Retorna o objeto Message
