@@ -29,14 +29,21 @@ class UDPServer:
             raise TypeError("Objeto não é do tipo Message")
         return obj
 
-    def empacota_resposta(self, resultado):
-        return pickle.dumps(resultado)
+    def empacota_resposta(self, resultado: any, request: Message) -> bytes:  # Mudança aqui: agora recebe Message como argumento
+        response_message = Message(
+            type=1,  # Supondo que 1 seja um tipo padrão para respostas
+            id=request.id,
+            obfReference=request.obfReference,
+            methodId=request.methodId,
+            arguments=pickle.dumps(resultado)
+        )
+        return pickle.dumps(response_message)
 
     async def tratar_requisicao(self, mensagem, endereco):
         try:
             requisicao = self.desempacota_requisicao(mensagem)
             resultado = await self.despachante.seleciona_esqueleto(requisicao)
-            resposta = self.empacota_resposta(resultado)
+            resposta = self.empacota_resposta(resultado, requisicao)
             self.send_reply(resposta, endereco)
         except Exception as e:
             print(f"Erro ao processar requisição: {e}")

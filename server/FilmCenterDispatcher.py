@@ -6,7 +6,7 @@ from common.models.message import Message
 from server.FilmCenterSkeleton import FilmCenterSkeleton
 
 class FilmCenterDispatcher:
-    async def seleciona_esqueleto(self, request: Message) -> Message:
+    async def seleciona_esqueleto(self, request: Message):
         resposta = None
         try:
             # Encontra a classe dentro do módulo
@@ -34,14 +34,6 @@ class FilmCenterDispatcher:
             # Executa o método e obtem a resposta
             esqueleto = obj_ref()
             resposta = await method(esqueleto, request.arguments)
-
-            response_message = Message(
-                type=1,  # Supondo que 1 seja um tipo padrão para respostas
-                id=request.id,
-                obfReference=request.obfReference,
-                methodId=request.methodId,
-                arguments=pickle.dumps(resposta)
-            )
             
         except ImportError as e:
             print(f"Erro ao importar módulo: {e}")

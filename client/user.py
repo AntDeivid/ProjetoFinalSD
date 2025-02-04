@@ -20,9 +20,6 @@ class FilmeClient:
         if not response:
             print("Erro: Nenhuma resposta recebida do servidor.")
             return
-
-        if "error" in response:
-            print(f"Erro: {response['error']}")
         else:
             print("\nInformações do filme:")
             print(response)
