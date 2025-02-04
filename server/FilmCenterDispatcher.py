@@ -1,16 +1,19 @@
 import inspect
+import pickle
 from typing import ByteString
+
+from common.models.message import Message
 from server.FilmCenterSkeleton import FilmCenterSkeleton
 
 class FilmCenterDispatcher:
-    async def seleciona_esqueleto(self, request):
+    async def seleciona_esqueleto(self, request: Message) -> Message:
         resposta = None
         try:
             # Encontra a classe dentro do módulo
-            class_name = f"{request['object_reference']}Skeleton"
+            class_name = f"{request.obfReference}Skeleton"
             obj_ref = globals()[class_name]
 
-            method_name = request['method_id']
+            method_name = request.methodId
             print(f"Executando: {method_name}")
            
             # Obtém o método da classe
@@ -29,8 +32,16 @@ class FilmCenterDispatcher:
                 raise TypeError(f"O parâmetro do método '{method_name}' deve ser do tipo ByteString.")
             
             # Executa o método e obtem a resposta
-            esqueleto = FilmCenterSkeleton()
-            resposta = await method(esqueleto, request['arguments'])
+            esqueleto = obj_ref()
+            resposta = await method(esqueleto, request.arguments)
+
+            response_message = Message(
+                type=1,  # Supondo que 1 seja um tipo padrão para respostas
+                id=request.id,
+                obfReference=request.obfReference,
+                methodId=request.methodId,
+                arguments=pickle.dumps(resposta)
+            )
             
         except ImportError as e:
             print(f"Erro ao importar módulo: {e}")

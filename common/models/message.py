@@ -5,7 +5,7 @@ class Message(BaseModel):
     type: int
     id: int
     obfReference: str
-    methodId: int
+    methodId: str
     arguments: bytes
 
     class Config:

@@ -2,50 +2,33 @@ from client.UDPClient import UDPClient
 from common.models.message import Message
 import pickle
 
-METHOD_IDS = {
-    "search_movie": 1,
-    "buscarStreaming": 2,
-    "criarLista": 3
-}
+from common.models.movie import Movie
+
 
 class FilmeProxy:
     def __init__(self, client: UDPClient):
         self.client = client
 
-    def do_operation(self, object_ref, method, args):
-        if method not in METHOD_IDS:
-            raise ValueError(f"Método desconhecido: {method}")
-
+    def do_operation(self, object_ref, method, args) -> Message:  # Retorna Message
         message = Message(
             type=0,
-            id=1, 
+            id=1,
             obfReference=object_ref,
-            methodId=METHOD_IDS[method],
+            methodId=method,
             arguments=pickle.dumps(args)
         )
-        print(f"Enviando requisição: {message}")
 
-        message_serializada = pickle.dumps(message)
-        
-        resposta_serializada = self.client.send_request(message_serializada)
+        self.client.send_request(message)
+        resposta_message: Message = self.client.get_response()
 
-        if resposta_serializada is None:
+        if resposta_message is None:
             raise Exception("Erro ao receber resposta do servidor.")
 
-        print(f"Resposta bruta recebida: {resposta_serializada}")
-        
-        resposta_message = pickle.loads(resposta_serializada)
-
-        # Certifique-se de que 'resposta_message' contém um atributo válido
-        if not hasattr(resposta_message, 'resultado'):
-            raise Exception("Resposta do servidor não contém o atributo 'resultado'")
-
-        return resposta_message.resultado
-
+        return resposta_message  # Retorna o objeto Message sem desserializar arguments
 
     def buscar_filme(self, query):
-        return self.do_operation("MovieService", "search_movie", [query])
-
+        response: Message = self.do_operation("FilmCenter", "search_movie", [query])
+        return pickle.loads(response.arguments)  # Desserializa arguments aqui
     # def buscar_streaming(self, filme_id):
     #     return self.do_operation("Locadora", 2, [filme_id])  # O método "buscarStreaming" tem ID 2
 
