@@ -16,3 +16,7 @@ class MovieService:
     @classmethod
     async def get_streaming_options(cls, movie_id: str) -> List[StreamingOption]:
         pass
+
+    @classmethod
+    async def create_movie_list(cls, user_id: int, name: str, description: str, movie_ids: List[int]) -> str:
+        pass
