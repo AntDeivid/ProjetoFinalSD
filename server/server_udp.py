@@ -1,10 +1,11 @@
 import socket
 import threading
 import asyncio
+import pickle
 
 from common.models.message import Message
 from server.FilmCenterDispatcher import FilmCenterDispatcher
-import pickle
+
 
 class UDPServer:
     def __init__(self, host='127.0.0.1', port=7896):
@@ -22,22 +23,12 @@ class UDPServer:
     def send_reply(self, resposta, endereco):
         self.socket.sendto(resposta, endereco)
 
-    def desempacota_requisicao(self, array) -> Message:
-        obj = pickle.loads(array)
-        print(f"Objeto desempacotado: {obj}, tipo: {type(obj)}")
-        if not isinstance(obj, Message):
-            raise TypeError("Objeto não é do tipo Message")
-        return obj
-
-    def empacota_resposta(self, resultado):
-        return pickle.dumps(resultado)
 
     async def tratar_requisicao(self, mensagem, endereco):
         try:
-            requisicao = self.desempacota_requisicao(mensagem)
+            requisicao = pickle.loads(mensagem) 
             resultado = await self.despachante.seleciona_esqueleto(requisicao)
-            resposta = self.empacota_resposta(resultado)
-            self.send_reply(resposta, endereco)
+            self.send_reply(pickle.dumps(resultado), endereco) 
         except Exception as e:
             print(f"Erro ao processar requisição: {e}")
 

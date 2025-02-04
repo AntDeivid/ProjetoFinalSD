@@ -32,7 +32,7 @@ class FilmeProxy:
             if not isinstance(response_message, Message):
                 raise TypeError("Resposta não é do tipo Message")
 
-            response = pickle.loads(pickle.loads(response_message.arguments))
+            response = pickle.loads(response_message.arguments)
             return response
         
         except Exception as e:
