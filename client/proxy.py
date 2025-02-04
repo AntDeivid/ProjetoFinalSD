@@ -1,5 +1,5 @@
 from client.UDPClient import UDPClient
-import json
+import pickle
 
 class Mensagem:
     def __init__(self, object_ref, method, args):
@@ -8,32 +8,31 @@ class Mensagem:
         self.args = args
 
     def serializar(self):
-        return json.dumps(self.__dict__).encode()
+        return pickle.dumps({
+            "object_ref": self.object_ref,
+            "method": self.method,
+            "args": self.args
+        })
 
     @staticmethod
     def desserializar(data):
-        obj = json.loads(data.decode())
+        obj = pickle.loads(data)
         return Mensagem(obj["object_ref"], obj["method"], obj["args"])
-
 
 class FilmeProxy:
     def __init__(self, client):
         self.client = client
 
     def do_operation(self, object_ref, method, args):
-        # Monta a mensagem com os parâmetros
         mensagem = Mensagem(object_ref, method, args)
         mensagem_serializada = mensagem.serializar()
         
-        # Envia a mensagem pelo cliente UDP e espera a resposta
         resposta_serializada = self.client.send_request(mensagem_serializada)
-        
-        # Desserializa a resposta recebida
         if resposta_serializada is None:
             raise Exception("Erro ao receber resposta do servidor.")
         
         resposta_mensagem = Mensagem.desserializar(resposta_serializada)
-        return resposta_mensagem.args  # O resultado está nos argumentos da resposta
+        return resposta_mensagem.args 
 
     def buscar_filme(self, query):
         return self.do_operation("Locadora", "buscarFilme", [query])
