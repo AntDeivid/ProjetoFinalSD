@@ -19,3 +19,5 @@ class UDPClient:
 
     def close(self):
         self.client_socket.close()
+
+#adicionar getResponse

@@ -99,7 +99,7 @@ class FilmeClient:
 if __name__ == "__main__":
     # Configurações do servidor
     SERVER_IP = "127.0.0.1"
-    SERVER_PORT = 12345
+    SERVER_PORT = 7896
 
     client = UDPClient(SERVER_IP, SERVER_PORT)
     proxy = FilmeProxy(client)
