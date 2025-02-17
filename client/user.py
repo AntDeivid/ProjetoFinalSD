@@ -1,7 +1,9 @@
-from client.UDPClient import UDPClient
 from client.proxy import FilmeProxy
 from InquirerPy import prompt
-
+from client.UDPClient import UDPClient
+from typing import List
+from common.models.movie import Movie
+from json import loads
 
 class FilmeClient:
     def __init__(self, proxy):
@@ -23,6 +25,8 @@ class FilmeClient:
         else:
             print("\nInformações do filme:")
             print(response)
+        except Exception as e:
+            print(f"Erro: {e}")
 
     def buscar_streaming(self):
         filme_id = prompt([

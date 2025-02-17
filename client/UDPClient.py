@@ -3,7 +3,6 @@ import socket
 
 from common.models.message import Message
 
-
 class UDPClient:
     def __init__(self, server_ip, server_port):
         self.server_address = (server_ip, server_port)
@@ -20,15 +19,14 @@ class UDPClient:
 
     def get_response(self) -> Message | None:
         try:
-            # Recebe e desserializa a resposta
-            response_serializada, _ = self.client_socket.recvfrom(4096)
+            response_serializada, _ = self.client_socket.recvfrom(65535)
             response: Message = pickle.loads(response_serializada)
             return response
         except socket.error as e:
             print(f"Erro ao receber resposta: {e}")
             return None
+   
 
     def close(self):
         self.client_socket.close()
 
-#adicionar getResponse
