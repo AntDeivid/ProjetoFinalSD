@@ -10,7 +10,7 @@ class StreamingOption(BaseModel):
     price: float
     free_trial: bool
     free_trial_duration: int
-    movie_id: str
+    movie_id: int
 
     class Config:
         arbitrary_types_allowed = True
