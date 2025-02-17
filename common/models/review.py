@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class Review(BaseModel):
@@ -6,7 +7,6 @@ class Review(BaseModel):
     movie_id: int
     user_id: int
     rating: float
-    content: str
-
+    content: Optional[str] = None
     class Config:
         arbitrary_types_allowed = True
