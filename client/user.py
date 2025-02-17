@@ -18,11 +18,13 @@ class FilmeClient:
             }
         ])["query"]
 
-        response = self.proxy.buscar_filme(query)
-        if not response:
-            print("Erro: Nenhuma resposta recebida do servidor.")
-            return
-        else:
+        try:
+            response: List[Movie] = self.proxy.buscar_filme(query)
+            
+            if not response:
+                print("Erro: Nenhuma resposta recebida do servidor.")
+                return
+
             print("\nInformações do filme:")
             print(response)
         except Exception as e:
