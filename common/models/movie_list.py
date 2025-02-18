@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from common.models.movie import Movie
 
 
-class MovieList(BaseModel):
+class  MovieList(BaseModel):
     id: int
     user_id: int
     name: str

@@ -54,3 +54,33 @@ class TMDbService:
             if video.get("type") == "Trailer" and video.get("site") == "YouTube":
                 return f"https://www.youtube.com/watch?v={video.get('key', '')}"
         return ""
+
+    @classmethod
+    async def _get_movie_by_id(cls, movie_id: int) -> Movie:
+        url = f"{cls.BASE_URL}/movie/{movie_id}"
+        params = {
+            "api_key": cls.API_KEY,
+            "language": "pt-BR",
+            "append_to_response": "videos,genres"
+        }
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url, params=params)
+                response.raise_for_status()
+                data = response.json()
+                return cls._format_movie(data)
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                raise ValueError("Filme não encontrado")
+            else:
+                raise e
+
+    @classmethod
+    async def get_movies_by_ids(cls, movie_ids: List[int]) -> List[Movie]:
+        movies = []
+        for movie_id in movie_ids:
+            movie = await cls._get_movie_by_id(movie_id)
+            if movie:
+                movies.append(movie)
+        return movies
