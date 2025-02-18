@@ -7,17 +7,25 @@ from common.models.movie import Movie
 from common.enums.streaming_option_id import StreamingOptionNameId
 from common.models.review import Review
 from common.models.streaming_option import StreamingOption
+import sys
 
-
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 CSV_FILE = "server/data/movieList.csv"
 
 CSV_SO = "server/data/streamingOptions.csv"
 
 def save_movie_list(movie_list: MovieList):
     """Salva um único MovieList no arquivo CSV."""
-    with open(CSV_FILE, 'w', newline='', encoding='utf-8') as csvfile:
+    # Verificando se o arquivo existe e está vazio para adicionar o cabeçalho
+    file_exists = os.path.exists(CSV_FILE)
+    file_is_empty = False
+    if file_exists:
+      file_is_empty = os.path.getsize(CSV_FILE) == 0
+    
+    with open(CSV_FILE, 'a', newline='', encoding='utf-8') as csvfile:  # Modo 'a' para adicionar
         writer = csv.writer(csvfile)
-        writer.writerow(["id", "user_id", "name", "description", "movies"])  # Cabeçalho
+        if not file_exists or file_is_empty:
+            writer.writerow(["id", "user_id", "name", "description", "movies"])  # Cabeçalho
         writer.writerow([
             movie_list.id,
             movie_list.user_id,
@@ -124,6 +132,7 @@ def save_streaming_options(streaming_options: List[StreamingOption]):
     print(f"Opções de streaming salvas em '{CSV_SO}' com sucesso!")
 
 if __name__ == '__main__':
+
     # Criação de objetos de exemplo
     review1 = Review(id=1, movie_id=1, user_id=1, rating=5.0, content="Excelente filme!")
     review2 = Review(id=2, movie_id=1, user_id=2, rating=4.5, content=None)
@@ -172,10 +181,12 @@ if __name__ == '__main__':
     )
     movie_list2 = MovieList(
         id=2, user_id=20, name="Séries da Maria", description="Séries que a Maria está assistindo.",
-        movies=[]
+        movies=[movie1]
     )
+
     initial_movie_lists = [movie_list1, movie_list2]
-    save_movie_list(initial_movie_lists)
+    for movie_list in initial_movie_lists:
+        save_movie_list(movie_list)
 
     # Carregar as listas do CSV
     loaded_lists = load_movie_lists()
