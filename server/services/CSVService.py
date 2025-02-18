@@ -13,23 +13,21 @@ CSV_FILE = "server/data/movieList.csv"
 
 CSV_SO = "server/data/streamingOptions.csv"
 
-def save_movie_lists(movie_lists: List[MovieList]):
-    """Salva a lista de MovieList no arquivo CSV."""
+def save_movie_list(movie_list: MovieList):
+    """Salva um único MovieList no arquivo CSV."""
     with open(CSV_FILE, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["id", "user_id", "name", "description", "movies"]) # Cabeçalho
-        for movie_list in movie_lists:
-           
-            writer.writerow([
-                movie_list.id,
-                movie_list.user_id,
-                movie_list.name,
-                movie_list.description,
-                json.dumps([
-                   movie.model_dump(by_alias=True, exclude_none=True) for movie in movie_list.movies
-               ])  # Convertemos a lista de filmes para JSON com exclusão de none
-            ])
-    print(f"Lista de MovieLists salva em '{CSV_FILE}' com sucesso!")
+        writer.writerow(["id", "user_id", "name", "description", "movies"])  # Cabeçalho
+        writer.writerow([
+            movie_list.id,
+            movie_list.user_id,
+            movie_list.name,
+            movie_list.description,
+            json.dumps([
+                movie.model_dump(by_alias=True, exclude_none=True) for movie in movie_list.movies
+            ])  # Convertemos a lista de filmes para JSON com exclusão de none
+        ])
+    print(f"MovieList salva em '{CSV_FILE}' com sucesso!")
 
 def load_movie_lists() -> List[MovieList]:
     """Carrega a lista de MovieList do arquivo CSV."""
@@ -42,7 +40,7 @@ def load_movie_lists() -> List[MovieList]:
         reader = csv.DictReader(csvfile)
         for row in reader:
             movies_data = json.loads(row['movies'])
-            movies = [Movie(**data) for data in movies_data] # Criamos objetos Movie a partir do JSON
+            movies = [Movie(**data) for data in movies_data]  # Criamos objetos Movie a partir do JSON
 
             movie_list = MovieList(
                 id=int(row['id']),
@@ -55,20 +53,16 @@ def load_movie_lists() -> List[MovieList]:
     print(f"Lista de MovieLists carregada de '{CSV_FILE}' com sucesso!")
     return movie_lists
 
-
 def update_movie_list(list_id: int, new_data: dict):
     """Atualiza um MovieList na lista e no CSV."""
     movie_lists = load_movie_lists()
     for movie_list in movie_lists:
         if movie_list.id == list_id:
-            
-           # Atualizar os atributos básicos da MovieList
+            # Atualizar os atributos básicos da MovieList
             for key, value in new_data.items():
-               if hasattr(movie_list, key):
-                 setattr(movie_list, key, value)
-
-
-            save_movie_lists(movie_lists)
+                if hasattr(movie_list, key):
+                    setattr(movie_list, key, value)
+            save_movie_list(movie_list)
             print(f"MovieList com id '{list_id}' atualizada.")
             return
     print(f"MovieList com id '{list_id}' não encontrada.")
@@ -77,11 +71,12 @@ def delete_movie_list(list_id: int):
     """Deleta um MovieList da lista e do CSV."""
     movie_lists = load_movie_lists()
     movie_lists = [movie_list for movie_list in movie_lists if movie_list.id != list_id]
-    save_movie_lists(movie_lists)
+    for movie_list in movie_lists:
+        save_movie_list(movie_list)
     print(f"MovieList com id '{list_id}' deletada.")
 
-def get_streaming_options(movie_id) -> List[StreamingOption]:
-    """Percorre o CSV procurando os campos 'movie_id' e retorna uma lista de StreamingOption."""
+def get_streaming_options(movie_id: int) -> List[StreamingOption]:
+    """Percorre o CSV procurando as opções de streaming de um filme específico."""
     streaming_options = []
     if not os.path.exists(CSV_SO):
         print(f"Arquivo '{CSV_SO}' não encontrado. Criando um novo.")
@@ -127,7 +122,6 @@ def save_streaming_options(streaming_options: List[StreamingOption]):
                 option.movie_id
             ])
     print(f"Opções de streaming salvas em '{CSV_SO}' com sucesso!")
-    
 
 if __name__ == '__main__':
     # Criação de objetos de exemplo
@@ -181,7 +175,7 @@ if __name__ == '__main__':
         movies=[]
     )
     initial_movie_lists = [movie_list1, movie_list2]
-    save_movie_lists(initial_movie_lists)
+    save_movie_list(initial_movie_lists)
 
     # Carregar as listas do CSV
     loaded_lists = load_movie_lists()
