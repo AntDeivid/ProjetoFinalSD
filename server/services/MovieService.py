@@ -26,3 +26,10 @@ class MovieService:
     async def create_movie_list(cls, movie_list: MovieList) -> MovieList:
         save_movie_list(movie_list)
         return movie_list
+
+    @classmethod
+    async def get_movies_by_ids(cls, movie_ids: List[int]) -> List[Movie]:
+        movies = await TMDbService.get_movies_by_ids(movie_ids)
+        if not movies:
+            raise ValueError("No movies found")
+        return movies

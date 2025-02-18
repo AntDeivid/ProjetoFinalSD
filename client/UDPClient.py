@@ -7,6 +7,7 @@ class UDPClient:
     def __init__(self, server_ip, server_port):
         self.server_address = (server_ip, server_port)
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65535)
 
     def send_request(self, request: Message):
         try:

@@ -47,4 +47,16 @@ class FilmCenterSkeleton:
             result = await MovieService.create_movie_list(movie_list)
             return result
         except ValueError as e:
-            raise e
+            return pickle.dumps(e)
+
+    async def get_movies_by_ids(self, args_bytes: ByteString):
+        try:
+            movie_ids = pickle.loads(args_bytes)
+            if not isinstance(movie_ids, list) or not all(isinstance(movie_id, int) for movie_id in movie_ids):
+                raise ValueError("Os IDs dos filmes devem ser uma lista de inteiros.")
+            filmes = await MovieService.get_movies_by_ids(movie_ids)
+            return pickle.dumps(filmes)
+        except ValueError as e:
+            return pickle.dumps(e)
+        except Exception as e:
+            return pickle.dumps(e)

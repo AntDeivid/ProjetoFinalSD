@@ -12,12 +12,14 @@ class UDPServer:
         self.host = host
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65535)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 65535)
         self.socket.bind((self.host, self.port))
         self.despachante = FilmCenterDispatcher()
         print(f"Servidor UDP rodando em {self.host}:{self.port}")
 
     def get_request(self):
-        mensagem, endereco = self.socket.recvfrom(1024)
+        mensagem, endereco = self.socket.recvfrom(8192)
         return mensagem, endereco
 
     def send_reply(self, resposta, endereco):
@@ -26,7 +28,7 @@ class UDPServer:
 
     async def tratar_requisicao(self, mensagem, endereco):
         try:
-            requisicao = pickle.loads(mensagem) 
+            requisicao = pickle.loads(mensagem)
             resultado = await self.despachante.seleciona_esqueleto(requisicao)
             self.send_reply(pickle.dumps(resultado), endereco) 
         except Exception as e:
