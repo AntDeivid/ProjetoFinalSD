@@ -14,6 +14,8 @@ class UDPServer:
         self.host = host
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65535)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 65535)
         self.socket.bind((self.host, self.port))
         self.despachante = FilmCenterDispatcher()
         self.historico_file = historico_file
@@ -43,7 +45,7 @@ class UDPServer:
         sys.exit(0)
 
     def get_request(self):
-        mensagem, endereco = self.socket.recvfrom(1024)
+        mensagem, endereco = self.socket.recvfrom(8192)
         return mensagem, endereco
 
     def send_reply(self, resposta, endereco):

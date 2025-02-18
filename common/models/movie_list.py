@@ -1,14 +1,16 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 from common.models.movie import Movie
 
 
 class  MovieList(BaseModel):
-    id: int
+    id: Optional[int] = None
     user_id: int
     name: str
     description: str
-    movies: list[Movie]
+    movies: Optional[list[Movie]] = None
 
     @property
     def movie_count(self):

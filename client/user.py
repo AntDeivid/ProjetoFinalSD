@@ -3,6 +3,8 @@ from InquirerPy import prompt
 from client.UDPClient import UDPClient
 from typing import List
 from common.models.movie import Movie
+from common.models.movie_list import MovieList
+from common.models.streaming_option import StreamingOption
 from json import loads
 
 class FilmeClient:
@@ -56,6 +58,22 @@ class FilmeClient:
             }
         ])["nome_lista"]
 
+        user_id = prompt([
+            {
+                "type": "input",
+                "name": "user_id",
+                "message": "Digite o ID do usuário:",
+            }
+        ])["user_id"]
+
+        description = prompt([
+            {
+                "type": "input",
+                "name": "description",
+                "message": "Digite a descrição da lista:",
+            }
+        ])["description"]
+
         filmes = prompt([
             {
                 "type": "input",
@@ -64,7 +82,13 @@ class FilmeClient:
             }
         ])["filmes"].split(",")
 
-        response = self.proxy.criar_lista(nome_lista, filmes)
+        movie_list = MovieList(
+            user_id=int(user_id),
+            name=nome_lista,
+            description=description,
+        )
+
+        response = self.proxy.criar_lista(movie_list, filmes)
         if "error" in response:
             print(f"Erro: {response['error']}")
         else:
