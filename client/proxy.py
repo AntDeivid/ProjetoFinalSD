@@ -1,18 +1,22 @@
 from client.UDPClient import UDPClient
 from common.models.message import Message
 import pickle
-
 from common.models.movie import Movie
-
 
 class FilmeProxy:
     def __init__(self, client: UDPClient):
         self.client = client
+        self.message_id = 0  # Inicializa o ID da mensagem
+
+    def get_next_id(self):
+        """ Gera um novo ID para cada mensagem """
+        self.message_id += 1
+        return self.message_id
 
     def do_operation(self, object_ref, method, args) -> Message:
         message = Message(
             type=0,
-            id=1,
+            id=self.get_next_id(),  # ID único por requisição
             obfReference=object_ref,
             methodId=method,
             arguments=pickle.dumps(args)
@@ -34,18 +38,11 @@ class FilmeProxy:
 
             response = pickle.loads(response_message.arguments)
             return response
-        
+
         except Exception as e:
             raise e
-        
-    def buscar_streaming(self, filme_id) -> list:
-        try:
-            response_message: Message = self.do_operation("FilmCenter", "get_streaming_options", [filme_id])
-            if not isinstance(response_message, Message):
-                return {"error": "Resposta inválida do servidor."}
 
-            response = pickle.loads(response_message.arguments)
-            return response
-            
-        except Exception as e:
-            return {"error": f"Erro ao buscar streaming: {str(e)}"}
+    def limpar_historico(self):
+        """ Envia uma solicitação para limpar o histórico no servidor """
+        self.do_operation("Server", "clear_history", [])
+

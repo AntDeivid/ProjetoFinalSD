@@ -1,20 +1,43 @@
 import socket
-import threading
 import asyncio
 import pickle
+import csv
+import os
+import signal
+import sys
+import ast
 
 from common.models.message import Message
 from server.FilmCenterDispatcher import FilmCenterDispatcher
 
-
 class UDPServer:
-    def __init__(self, host='127.0.0.1', port=7896):
+    def __init__(self, host='127.0.0.1', port=7896, historico_file="historico.csv"):
         self.host = host
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind((self.host, self.port))
         self.despachante = FilmCenterDispatcher()
+        self.historico_file = historico_file
+
+        self._criar_csv()
+
+        # Capturar sinais de encerramento (CTRL+C ou SIGTERM)
+        signal.signal(signal.SIGINT, self.limpar_servidor)
+        signal.signal(signal.SIGTERM, self.limpar_servidor)
+
         print(f"Servidor UDP rodando em {self.host}:{self.port}")
+
+    def _criar_csv(self):
+        """Cria o arquivo CSV se não existir"""
+        if not os.path.exists(self.historico_file):
+            with open(self.historico_file, mode='w', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                writer.writerow(["id", "resposta"])
+
+    def limpar_servidor(self, *args):
+        """Encerra o servidor."""
+        print("\n[INFO] Encerrando servidor.")
+        sys.exit(0)
 
     def get_request(self):
         mensagem, endereco = self.socket.recvfrom(1024)
@@ -23,14 +46,56 @@ class UDPServer:
     def send_reply(self, resposta, endereco):
         self.socket.sendto(resposta, endereco)
 
+    def buscar_no_historico(self, msg_id):
+        """Verifica se um ID já está no histórico e retorna a resposta correspondente."""
+        try:
+            with open(self.historico_file, mode='r', encoding='utf-8') as file:
+                reader = csv.reader(file)
+                next(reader, None)  # Pula o cabeçalho, mas não falha se o arquivo estiver vazio
+                for row in reader:
+                    if row and int(row[0]) == msg_id: # Verifica se a linha não está vazia
+                        return pickle.loads(ast.literal_eval(row[1]))
+        except FileNotFoundError:
+            print(f"Arquivo de histórico não encontrado: {self.historico_file}")
+            return None
+        except Exception as e:
+            print(f"Erro ao ler o histórico: {e}")
+            return None
+        return None
+
+    def salvar_no_historico(self, msg_id, resposta):
+        """Salva uma nova resposta no histórico."""
+        with open(self.historico_file, mode='a', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow([msg_id, repr(pickle.dumps(resposta))])
 
     async def tratar_requisicao(self, mensagem, endereco):
         try:
-            requisicao = pickle.loads(mensagem) 
-            resultado = await self.despachante.seleciona_esqueleto(requisicao)
-            self.send_reply(pickle.dumps(resultado), endereco) 
+            requisicao = pickle.loads(mensagem)
+            msg_id = requisicao.id
+
+            if requisicao.methodId == "clear_history":
+                self.limpar_historico()  # Limpa o histórico
+                resposta = {"status": "OK", "message": "Histórico limpo"}
+            else:
+                resposta = self.buscar_no_historico(msg_id)
+                if resposta:
+                    print(f"Mensagem duplicada detectada (ID: {msg_id})! Retornando resposta do cache.")
+                else:
+                    resultado = await self.despachante.seleciona_esqueleto(requisicao)
+                    resposta = resultado
+                    self.salvar_no_historico(msg_id, resposta)
+
+            self.send_reply(pickle.dumps(resposta), endereco)
         except Exception as e:
             print(f"Erro ao processar requisição: {e}")
+
+    def limpar_historico(self):
+        """ Remove o arquivo CSV para limpar o histórico """
+        print("[INFO] Limpeza do histórico solicitada.")
+        if os.path.exists(self.historico_file):
+            os.remove(self.historico_file)
+
 
     def iniciar(self):
         loop = asyncio.get_event_loop()
