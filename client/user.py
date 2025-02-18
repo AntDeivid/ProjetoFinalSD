@@ -41,13 +41,21 @@ class FilmeClient:
             }
         ])["filme_id"]
 
+        try:
+            filme_id = int(filme_id)
+        except ValueError:
+            print("Erro: O ID do filme deve ser um número inteiro.")
+            return
+        
         response = self.proxy.buscar_streaming(filme_id)
         if "error" in response:
             print(f"Erro: {response['error']}")
         else:
             print("\nOpções de Streaming disponíveis:")
             for option in response:
-                print(f"- Plataforma: {option['plataforma']}, Link: {option['link']}")
+                # Acessa os atributos do objeto StreamingOption diretamente e formata o nome da plataforma
+                plataforma = option.name_id.name.replace("_", " ").title()
+                print(f"- Plataforma: {plataforma}, Link: {option.url}")
 
     def criar_lista(self):
         nome_lista = prompt([
