@@ -37,3 +37,15 @@ class FilmeProxy:
         
         except Exception as e:
             raise e
+        
+    def buscar_streaming(self, filme_id) -> list:
+        try:
+            response_message: Message = self.do_operation("FilmCenter", "get_streaming_options", [filme_id])
+            if not isinstance(response_message, Message):
+                return {"error": "Resposta inválida do servidor."}
+
+            response = pickle.loads(response_message.arguments)
+            return response
+            
+        except Exception as e:
+            return {"error": f"Erro ao buscar streaming: {str(e)}"}

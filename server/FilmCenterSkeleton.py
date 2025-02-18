@@ -21,11 +21,17 @@ class FilmCenterSkeleton:
 
     async def get_streaming_options(self, args_bytes: ByteString):
         try:
-            filme_id = pickle.loads(args_bytes)
-            if not isinstance(filme_id, int):
+            args = pickle.loads(args_bytes)
+
+            # Ajuste aqui: extraindo o ID do filme corretamente se vier como lista
+            if not isinstance(args, list) or len(args) != 1 or not isinstance(args[0], int):
                 raise ValueError("O ID do filme deve ser um inteiro.")
+
+            filme_id = args[0]  # Pegando o ID correto
+
             opcoes = await MovieService.get_streaming_options(filme_id)
             return pickle.dumps(opcoes)
+
         except ValueError as e:
             return pickle.dumps(e)
         except Exception as e:
