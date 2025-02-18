@@ -3,7 +3,7 @@ from typing import List, Optional
 from common.models.movie import Movie
 from common.models.movie_list import MovieList
 from common.models.streaming_option import StreamingOption
-from server.services.CSVService import get_streaming_options, save_movie_lists
+from server.services.CSVService import get_streaming_options, save_movie_list
 from server.services.TMDbService import TMDbService
 
 
@@ -24,5 +24,5 @@ class MovieService:
 
     @classmethod
     async def create_movie_list(cls, movie_list: MovieList) -> MovieList:
-        save_movie_lists(movie_list)
+        save_movie_list(movie_list)
         return movie_list
