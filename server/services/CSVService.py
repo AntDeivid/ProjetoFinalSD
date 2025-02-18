@@ -18,10 +18,10 @@ def save_movie_list(movie_list: MovieList):
     """Salva um único MovieList no arquivo CSV."""
     with open(CSV_FILE, 'a', newline='', encoding='utf-8') as csvfile:
     # Verificando se o arquivo existe e está vazio para adicionar o cabeçalho
-    file_exists = os.path.exists(CSV_FILE)
-    file_is_empty = False
+        file_exists = os.path.exists(CSV_FILE)
+        file_is_empty = False
     if file_exists:
-      file_is_empty = os.path.getsize(CSV_FILE) == 0
+        file_is_empty = os.path.getsize(CSV_FILE) == 0
 
     with open(CSV_FILE, 'a', newline='', encoding='utf-8') as csvfile:  # Modo 'a' para adicionar
         writer = csv.writer(csvfile)
