@@ -23,11 +23,10 @@ class FilmCenterSkeleton:
         try:
             args = pickle.loads(args_bytes)
 
-            # Ajuste aqui: extraindo o ID do filme corretamente se vier como lista
             if not isinstance(args, list) or len(args) != 1 or not isinstance(args[0], int):
                 raise ValueError("O ID do filme deve ser um inteiro.")
 
-            filme_id = args[0]  # Pegando o ID correto
+            filme_id = args[0]
 
             opcoes = await MovieService.get_streaming_options(filme_id)
             return pickle.dumps(opcoes)
@@ -37,7 +36,7 @@ class FilmCenterSkeleton:
         except Exception as e:
             return pickle.dumps(e)
 
-    async def create_movie_list(self, args_bytes: ByteString) -> MovieList:
+    async def create_movie_list(self, args_bytes: ByteString):
         try:
             movie_list = pickle.loads(args_bytes)
 
@@ -45,7 +44,7 @@ class FilmCenterSkeleton:
                 raise ValueError("O objeto de lista de filmes é inválido.")
 
             result = await MovieService.create_movie_list(movie_list)
-            return result
+            return pickle.dumps(result)
         except ValueError as e:
             return pickle.dumps(e)
 

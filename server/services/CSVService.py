@@ -15,7 +15,7 @@ CSV_SO = "server/data/streamingOptions.csv"
 
 def save_movie_list(movie_list: MovieList):
     """Salva um único MovieList no arquivo CSV."""
-    with open(CSV_FILE, 'w', newline='', encoding='utf-8') as csvfile:
+    with open(CSV_FILE, 'a', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["id", "user_id", "name", "description", "movies"])  # Cabeçalho
         writer.writerow([
