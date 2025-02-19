@@ -1,6 +1,6 @@
-import pickle
+import json
 import socket
-
+import base64
 from common.models.message import Message
 
 class UDPClient:
@@ -13,8 +13,11 @@ class UDPClient:
 
     def send_request(self, request: Message):
         try:
-            # Serializa a mensagem antes de enviar
-            request_serializada = pickle.dumps(request)
+            # Converter 'arguments' para uma string Base64 antes de serializar
+            request_dict = request.model_dump()
+            request_dict["arguments"] = request_dict["arguments"].decode("utf-8")  # Ou usar base64 para binários
+            
+            request_serializada = json.dumps(request_dict).encode("utf-8")
             self.client_socket.sendto(request_serializada, self.server_address)
         except socket.error as e:
             print(f"Erro ao enviar requisição: {e}")
@@ -25,8 +28,14 @@ class UDPClient:
         while retries < self.max_retries:
             try:
                 response_serializada, _ = self.client_socket.recvfrom(65535)
-                response: Message = pickle.loads(response_serializada)
-                return response
+
+                # Decodifica a resposta JSON
+                response_dict = json.loads(response_serializada.decode("utf-8"))
+
+                # Converte 'arguments' de Base64 de volta para bytes
+                response_dict["arguments"] = base64.b64decode(response_dict["arguments"])
+
+                return Message(**response_dict)
             except socket.timeout:
                 retries += 1
                 print(f"Timeout: tentando novamente ({retries}/{self.max_retries})")
@@ -36,8 +45,6 @@ class UDPClient:
 
         print("Número máximo de tentativas excedido.")
         return None
-   
 
     def close(self):
         self.client_socket.close()
-

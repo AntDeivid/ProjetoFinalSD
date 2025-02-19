@@ -1,8 +1,7 @@
-from typing import Optional, List
-
+from typing import List
 from client.UDPClient import UDPClient
 from common.models.message import Message
-import pickle
+import json
 from common.models.movie import Movie
 from common.models.movie_list import MovieList
 
@@ -21,7 +20,7 @@ class FilmeProxy:
             id=self.get_next_id(),  
             obfReference=object_ref,
             methodId=method,
-            arguments=pickle.dumps(args)
+            arguments=json.dumps(args).encode("utf-8")
         )
 
         self.client.send_request(message)
@@ -38,8 +37,8 @@ class FilmeProxy:
             if not isinstance(response_message, Message):
                 raise TypeError("Resposta não é do tipo Message")
 
-            response = pickle.loads(response_message.arguments)
-            return response
+            response_data = json.loads(response_message.arguments.decode("utf-8"))
+            return Movie(**response_data)
 
         except Exception as e:
             raise e
@@ -51,7 +50,7 @@ class FilmeProxy:
             print("pegou os filmes")
             if not isinstance(response_message, Message):
                 raise TypeError("Resposta não é do tipo Message")
-            response = pickle.loads(response_message.arguments)
+            response = json.loads(response_message.arguments.decode("utf-8"))
             movie_list.movies = response
             print("setou os filmes")
         except Exception as e:
@@ -63,7 +62,7 @@ class FilmeProxy:
             if not isinstance(response_message, Message):
                 raise TypeError("Resposta não é do tipo Message")
 
-            response = pickle.loads(response_message.arguments)
+            response = json.loads(response_message.arguments.decode("utf-8"))
             return response
         except Exception as e:
             raise e
@@ -74,7 +73,7 @@ class FilmeProxy:
             if not isinstance(response_message, Message):
                 return {"error": "Resposta inválida do servidor."}
 
-            response = pickle.loads(response_message.arguments)
+            response = json.loads(response_message.arguments.decode("utf-8"))
             return response
             
         except Exception as e:

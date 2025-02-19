@@ -1,3 +1,4 @@
+from typing import ByteString
 from pydantic import BaseModel
 
 
@@ -6,7 +7,7 @@ class Message(BaseModel):
     id: int
     obfReference: str
     methodId: str
-    arguments: bytes
+    arguments: ByteString
 
     class Config:
         arbitrary_types_allowed = True

@@ -1,7 +1,6 @@
 import csv
 import os
-import pickle
-import ast
+import json
 
 class HistoryManager:
     def __init__(self, historico_file="server/data/historico.csv"):
@@ -27,7 +26,7 @@ class HistoryManager:
                 next(reader, None)  # Pula o cabeçalho
                 for row in reader:
                     if row and int(row[0]) == msg_id:
-                        return pickle.loads(ast.literal_eval(row[1]))
+                        return json.loads(row[1])
         except FileNotFoundError:
             print(f"[ERRO] Arquivo de histórico não encontrado: {self.historico_file}")
         except Exception as e:
@@ -38,7 +37,7 @@ class HistoryManager:
         try:
             with open(self.historico_file, mode='a', newline='', encoding='utf-8') as file:
                 writer = csv.writer(file)
-                writer.writerow([msg_id, repr(pickle.dumps(resposta))])
+                writer.writerow([msg_id, json.dumps(resposta)])
         except Exception as e:
             print(f"[ERRO] Falha ao salvar no histórico: {e}")
 

@@ -1,5 +1,5 @@
 import inspect
-import pickle
+import json
 from typing import ByteString
 
 from common.models.message import Message
@@ -30,16 +30,18 @@ class FilmCenterDispatcher:
             if param_type is not ByteString:
                 raise TypeError(f"O parâmetro do método '{method_name}' deve ser do tipo ByteString.")
 
+            json_arguments = request.arguments.decode("utf-8")
+
             # Executa o método e obtem a resposta
             esqueleto = obj_ref()
-            resposta = await method(esqueleto, request.arguments)
+            resposta = await method(esqueleto, json_arguments)
 
             response_message = Message(
                 type=1, 
                 id=request.id,
                 obfReference=request.obfReference,
                 methodId=request.methodId,
-                arguments=resposta 
+                arguments=resposta.encode("utf-8")
             )
 
         except ImportError as e:
@@ -49,7 +51,7 @@ class FilmCenterDispatcher:
                 id=request.id,
                 obfReference=request.obfReference,
                 methodId=request.methodId,
-                arguments=pickle.dumps(e)
+                arguments=json.dumps(e).encode("utf-8")
             )
         except AttributeError as e:
             print(f"Erro ao acessar atributo ou classe: {e}")
@@ -58,7 +60,7 @@ class FilmCenterDispatcher:
                 id=request.id,
                 obfReference=request.obfReference,
                 methodId=request.methodId,
-                arguments=pickle.dumps(e)
+                arguments=json.dumps(e).encode("utf-8")
             )
         except TypeError as e:
             print(f"Erro de tipo: {e}")
@@ -67,7 +69,7 @@ class FilmCenterDispatcher:
                 id=request.id,
                 obfReference=request.obfReference,
                 methodId=request.methodId,
-                arguments=pickle.dumps(e)
+                arguments=json.dumps(e).encode("utf-8")
             )
         except Exception as e:
             print(f"Erro inesperado: {e}")
@@ -76,6 +78,6 @@ class FilmCenterDispatcher:
                 id=request.id,
                 obfReference=request.obfReference,
                 methodId=request.methodId,
-                arguments=pickle.dumps(e)
+                arguments=json.dumps(e).encode("utf-8")
             )
         return response_message  # Retorna o objeto Message
