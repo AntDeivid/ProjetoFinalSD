@@ -3,6 +3,8 @@ import os
 import json
 import base64
 
+from common.models.message import Message
+
 class HistoryManager:
     def __init__(self, historico_file="server/data/historico.csv"):
         self.historico_file = historico_file
