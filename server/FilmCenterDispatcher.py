@@ -4,21 +4,24 @@ from typing import ByteString
 
 from common.models.message import Message
 from server.FilmCenterSkeleton import FilmCenterSkeleton
+from server.history_manager import HistoryManager
 
+history = HistoryManager()
 class FilmCenterDispatcher:
     async def seleciona_esqueleto(self, request: Message) -> Message:
         try:
-            # Encontra a classe dentro do módulo
+            if(request.methodId == "clear_history"):
+                history.limpar()
+                 
+            
             class_name = f"{request.obfReference}Skeleton"
             obj_ref = globals()[class_name]
 
             method_name = request.methodId
             print(f"Executando: {method_name}")
 
-            # Obtém o método da classe
             method = getattr(obj_ref, method_name)
 
-            # Verifica se o método existe e se espera um argumento do tipo ByteString
             if not callable(method):
                 raise AttributeError(f"Método '{method_name}' não encontrado ou não é chamável.")
 
@@ -30,18 +33,15 @@ class FilmCenterDispatcher:
             if param_type is not ByteString:
                 raise TypeError(f"O parâmetro do método '{method_name}' deve ser do tipo ByteString.")
 
-            json_arguments = request.arguments.decode("utf-8")
-
-            # Executa o método e obtem a resposta
             esqueleto = obj_ref()
-            resposta = await method(esqueleto, json_arguments)
+            resposta = await method(esqueleto, request.arguments)
 
             response_message = Message(
-                type=1, 
+                type=1,
                 id=request.id,
                 obfReference=request.obfReference,
                 methodId=request.methodId,
-                arguments=resposta.encode("utf-8")
+                arguments=resposta
             )
 
         except ImportError as e:
@@ -51,7 +51,7 @@ class FilmCenterDispatcher:
                 id=request.id,
                 obfReference=request.obfReference,
                 methodId=request.methodId,
-                arguments=json.dumps(e).encode("utf-8")
+                arguments=json.dumps(str(e)).encode("utf-8")
             )
         except AttributeError as e:
             print(f"Erro ao acessar atributo ou classe: {e}")
@@ -60,7 +60,7 @@ class FilmCenterDispatcher:
                 id=request.id,
                 obfReference=request.obfReference,
                 methodId=request.methodId,
-                arguments=json.dumps(e).encode("utf-8")
+                arguments=json.dumps(str(e)).encode("utf-8")
             )
         except TypeError as e:
             print(f"Erro de tipo: {e}")
@@ -69,7 +69,7 @@ class FilmCenterDispatcher:
                 id=request.id,
                 obfReference=request.obfReference,
                 methodId=request.methodId,
-                arguments=json.dumps(e).encode("utf-8")
+                arguments=json.dumps(str(e)).encode("utf-8")
             )
         except Exception as e:
             print(f"Erro inesperado: {e}")
@@ -78,6 +78,6 @@ class FilmCenterDispatcher:
                 id=request.id,
                 obfReference=request.obfReference,
                 methodId=request.methodId,
-                arguments=json.dumps(e).encode("utf-8")
+                arguments=json.dumps(str(e)).encode("utf-8")
             )
-        return response_message  # Retorna o objeto Message
+        return response_message

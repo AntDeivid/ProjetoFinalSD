@@ -20,7 +20,7 @@ class FilmeProxy:
             id=self.get_next_id(),  
             obfReference=object_ref,
             methodId=method,
-            arguments=json.dumps(args).encode("utf-8")
+            arguments=json.dumps(args).encode("utf-8") 
         )
 
         self.client.send_request(message)
@@ -31,14 +31,17 @@ class FilmeProxy:
 
         return resposta_message
 
-    def buscar_filme(self, query) -> Movie:
+    def buscar_filme(self, query) -> List[Movie]:
         try:
             response_message: Message = self.do_operation("FilmCenter", "search_movie", [query])
             if not isinstance(response_message, Message):
                 raise TypeError("Resposta não é do tipo Message")
 
             response_data = json.loads(response_message.arguments.decode("utf-8"))
-            return Movie(**response_data)
+            if isinstance(response_data, list):
+                return [Movie(**movie) if isinstance(movie, dict) else movie for movie in response_data]
+            else:
+                raise TypeError("Resposta não é uma lista de filmes")
 
         except Exception as e:
             raise e
@@ -57,7 +60,7 @@ class FilmeProxy:
             raise e
 
         try:
-            response_message: Message = self.do_operation("FilmCenter", "create_movie_list", movie_list)
+            response_message: Message = self.do_operation("FilmCenter", "create_movie_list", movie_list.model_dump())
             print("criou a lista")
             if not isinstance(response_message, Message):
                 raise TypeError("Resposta não é do tipo Message")

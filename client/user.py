@@ -54,8 +54,7 @@ class FilmeClient:
             print("\nOpções de Streaming disponíveis:")
             for option in response:
                 # Acessa os atributos do objeto StreamingOption diretamente e formata o nome da plataforma
-                plataforma = option.name_id.name.replace("_", " ").title()
-                print(f"- Plataforma: {plataforma}, Link: {option.url}")
+                print(option)
 
     def criar_lista(self):
         nome_lista = prompt([

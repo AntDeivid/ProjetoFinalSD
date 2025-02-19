@@ -14,11 +14,11 @@ class FilmCenterSkeleton:
                 raise ValueError("Os parâmetros de busca devem ser uma lista de strings.")
             busca = args[0]
             filmes = await MovieService.search_movie(busca)
-            return json.dumps(filmes).encode("utf-8")
+            return json.dumps([movie.dict() for movie in filmes]).encode("utf-8")
         except ValueError as e:
-            return json.dumps(e).encode("utf-8")
+            return json.dumps({"error": str(e)}).encode("utf-8")
         except Exception as e:
-            return json.dumps(e).encode("utf-8")
+            return json.dumps({"error": str(e)}).encode("utf-8")
 
     async def get_streaming_options(self, args_bytes: ByteString):
         try:
@@ -31,12 +31,12 @@ class FilmCenterSkeleton:
             filme_id = args[0]
 
             opcoes = await MovieService.get_streaming_options(filme_id)
-            return json.dumps(opcoes).encode("utf-8")
+            return json.dumps([opcao.dict() for opcao in opcoes]).encode("utf-8")
 
         except ValueError as e:
-            return json.dumps(e).encode("utf-8")
+            return json.dumps({"error": str(e)}).encode("utf-8")
         except Exception as e:
-            return json.dumps(e).encode("utf-8")
+            return json.dumps({"error": str(e)}).encode("utf-8")
 
     async def create_movie_list(self, args_bytes: ByteString):
         try:
@@ -48,9 +48,9 @@ class FilmCenterSkeleton:
                 raise ValueError("O objeto de lista de filmes é inválido.")
 
             result = await MovieService.create_movie_list(movie_list)
-            return json.dumps(result).encode("utf-8")
+            return json.dumps(result.dict()).encode("utf-8")
         except ValueError as e:
-            return json.dumps(e).encode("utf-8")
+            return json.dumps({"error": str(e)}).encode("utf-8")
 
     async def get_movies_by_ids(self, args_bytes: ByteString):
         try:
@@ -60,8 +60,8 @@ class FilmCenterSkeleton:
             if not isinstance(movie_ids, list) or not all(isinstance(movie_id, int) for movie_id in movie_ids):
                 raise ValueError("Os IDs dos filmes devem ser uma lista de inteiros.")
             filmes = await MovieService.get_movies_by_ids(movie_ids)
-            return json.dumps(filmes).encode("utf-8")
+            return json.dumps([filme.dict() for filme in filmes]).encode("utf-8")
         except ValueError as e:
-            return json.dumps(e).encode("utf-8")
+            return json.dumps({"error": str(e)}).encode("utf-8")
         except Exception as e:
-            return json.dumps(e).encode("utf-8")
+            return json.dumps({"error": str(e)}).encode("utf-8")

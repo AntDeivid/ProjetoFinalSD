@@ -1,6 +1,7 @@
 import csv
 import os
 import json
+import base64
 
 class HistoryManager:
     def __init__(self, historico_file="server/data/historico.csv"):
@@ -26,7 +27,9 @@ class HistoryManager:
                 next(reader, None)  # Pula o cabeçalho
                 for row in reader:
                     if row and int(row[0]) == msg_id:
-                        return json.loads(row[1])
+                        resposta_dict = json.loads(row[1])
+                        resposta_dict["arguments"] = base64.b64decode(resposta_dict["arguments"])
+                        return Message(**resposta_dict)
         except FileNotFoundError:
             print(f"[ERRO] Arquivo de histórico não encontrado: {self.historico_file}")
         except Exception as e:
@@ -35,9 +38,11 @@ class HistoryManager:
 
     def salvar(self, msg_id, resposta):
         try:
+            resposta_dict = resposta.model_dump()
+            resposta_dict["arguments"] = base64.b64encode(resposta_dict["arguments"]).decode("utf-8")
             with open(self.historico_file, mode='a', newline='', encoding='utf-8') as file:
                 writer = csv.writer(file)
-                writer.writerow([msg_id, json.dumps(resposta)])
+                writer.writerow([msg_id, json.dumps(resposta_dict)])
         except Exception as e:
             print(f"[ERRO] Falha ao salvar no histórico: {e}")
 

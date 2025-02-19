@@ -13,9 +13,8 @@ class UDPClient:
 
     def send_request(self, request: Message):
         try:
-            # Converter 'arguments' para uma string Base64 antes de serializar
             request_dict = request.model_dump()
-            request_dict["arguments"] = request_dict["arguments"].decode("utf-8")  # Ou usar base64 para binários
+            request_dict["arguments"] = base64.b64encode(request_dict["arguments"]).decode("utf-8")
             
             request_serializada = json.dumps(request_dict).encode("utf-8")
             self.client_socket.sendto(request_serializada, self.server_address)
@@ -29,10 +28,7 @@ class UDPClient:
             try:
                 response_serializada, _ = self.client_socket.recvfrom(65535)
 
-                # Decodifica a resposta JSON
                 response_dict = json.loads(response_serializada.decode("utf-8"))
-
-                # Converte 'arguments' de Base64 de volta para bytes
                 response_dict["arguments"] = base64.b64decode(response_dict["arguments"])
 
                 return Message(**response_dict)
