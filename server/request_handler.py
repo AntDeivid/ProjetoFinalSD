@@ -32,7 +32,7 @@ class RequestHandler:
             resposta_dict = resposta.model_dump()
             resposta_dict["arguments"] = base64.b64encode(resposta_dict["arguments"]).decode("utf-8")
 
-            return json.dumps(resposta_dict).encode("utf-8")  # Certifique-se de enviar bytes de volta
+            return json.dumps(resposta_dict).encode("utf-8")
         except Exception as e:
             print(f"Erro ao processar requisição: {e}")
             return json.dumps({"erro": str(e)}).encode("utf-8")
