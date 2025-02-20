@@ -4,8 +4,10 @@ import base64
 from common.models.message import Message
 
 class UDPClient:
-    def __init__(self, server_ip, server_port, timeout=2, max_retries=3):
-        self.server_address = (server_ip, server_port)
+    def __init__(self, timeout=2, max_retries=3):
+        self.server_ip = "127.0.0.1"
+        self.server_port = 7896
+        self.server_address = (self.server_ip, self.server_port)
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65535)
         self.client_socket.settimeout(timeout)

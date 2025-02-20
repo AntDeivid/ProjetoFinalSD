@@ -6,9 +6,9 @@ from common.models.movie import Movie
 from common.models.movie_list import MovieList
 
 class FilmeProxy:
-    def __init__(self, client: UDPClient):
-        self.client = client
-        self.message_id = 0  
+    def __init__(self):
+        self.client = UDPClient()
+        self.message_id = 0
 
     def get_next_id(self):
         self.message_id += 1
@@ -85,3 +85,6 @@ class FilmeProxy:
     
     def limpar_historico(self):
         self.do_operation("Server", "clear_history", [])
+
+    def close(self):
+        self.client.close()
