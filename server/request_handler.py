@@ -22,6 +22,7 @@ class RequestHandler:
             msg_id = requisicao.id
 
             resposta = self.history.buscar(msg_id)
+            print('resposta:', resposta)
             if resposta:
                 print(f"Requisição duplicada detectada (ID: {msg_id}). Enviando resposta do cache.")
             else:
