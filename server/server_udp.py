@@ -15,6 +15,10 @@ class UDPServer:
         while True:
             mensagem, endereco = self.socket.recvfrom(8192)
             resposta = await self.request_handler.processar_requisicao(mensagem)
+
+            # Para testar o timeout e reenvio, descomente a linha abaixo e faça uma requisição para o servidor pelo cliente
+            continue
+
             self.socket.sendto(resposta, endereco)
 
 if __name__ == "__main__":
